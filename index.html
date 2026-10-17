@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="gu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<title>MDM દૈનિક ખર્ચ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Serif+Gujarati:wght@600;700&family=IBM+Plex+Sans:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: dark-brown banner with a thali motif on an orange dotted page. Inputs on the left (days, then one panel per account), a sticky result card on the right, breakdown tables below. Savings get their own coloured tile in every summary. */
+:root {
+  --bg: #F59A3C;
+  --dots: rgba(255, 255, 255, .22);
+  --bg-fg: #2B1305;
+  --bg-muted: #5E2F0D;
+  --ink: #4A1D08;
+  --ink-fg: #FFF1E0;
+  --surface: #FFFDFA;
+  --fg: #2A1A10;
+  --muted: #6B5646;
+  --line: #EBDACA;
+  --field: #FBF2E8;
+  --accent: #A8420F;
+  --accent-soft: #FCE7D5;
+  --ifms: #2F5E8E;
+  --ifms-soft: #E3ECF7;
+  --total-bg: #5F230B;
+  --total-fg: #FFF1E3;
+  --seg1: #FFB35C;
+  --seg2: #8FB8EA;
+  --good: #1E6B3A;
+  --good-soft: #DDF1E3;
+  --bad: #B3261E;
+  --bad-soft: #FBE0DC;
+  --shadow: 0 1px 0 rgba(60, 25, 5, .08), 0 14px 30px -18px rgba(60, 25, 5, .55);
+  --font-body: "Noto Sans Gujarati", system-ui, sans-serif;
+  --font-display: "Noto Serif Gujarati", "Noto Sans Gujarati", serif;
+  --font-num: "IBM Plex Sans", "Noto Sans Gujarati", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #7E3C0C; --dots: rgba(255, 255, 255, .07); --bg-fg: #FFF3E6; --bg-muted: #F6D9BC;
+    --ink: #2B1006; --ink-fg: #FFE9D0;
+    --surface: #2A1D14; --fg: #F5E9DD; --muted: #BFA992; --line: #473426; --field: #1F150E;
+    --accent: #FFB36B; --accent-soft: #4A2C16;
+    --ifms: #8FB2E4; --ifms-soft: #1E2B40;
+    --total-bg: #3A1708; --total-fg: #FFE2C4;
+    --good: #7FD6A0; --good-soft: #1B3A29; --bad: #FF9A90; --bad-soft: #4A2220;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #7E3C0C; --dots: rgba(255, 255, 255, .07); --bg-fg: #FFF3E6; --bg-muted: #F6D9BC;
+  --ink: #2B1006; --ink-fg: #FFE9D0;
+  --surface: #2A1D14; --fg: #F5E9DD; --muted: #BFA992; --line: #473426; --field: #1F150E;
+  --accent: #FFB36B; --accent-soft: #4A2C16;
+  --ifms: #8FB2E4; --ifms-soft: #1E2B40;
+  --total-bg: #3A1708; --total-fg: #FFE2C4;
+  --good: #7FD6A0; --good-soft: #1B3A29; --bad: #FF9A90; --bad-soft: #4A2220;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background-color: var(--bg); background-image: radial-gradient(var(--dots) 1.6px, transparent 1.6px); background-size: 22px 22px; color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; padding-inline: 16px; padding-block: 20px 56px; }
+.wrap { max-width: 1080px; margin-inline: auto; display: flex; flex-direction: column; gap: 18px; }
+
+/* banner */
+.banner { background: var(--ink); color: var(--ink-fg); border-radius: 18px; padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; box-shadow: var(--shadow); overflow: hidden; }
+.banner .txt { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.banner h1 { font-family: var(--font-display); font-size: clamp(23px, 5.2vw, 34px); line-height: 1.25; margin: 0; text-wrap: balance; }
+.banner p { margin: 0; font-size: 14px; opacity: .88; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { font-size: 12.5px; font-weight: 600; padding: 3px 11px; border-radius: 99px; background: color-mix(in srgb, var(--ink-fg) 14%, transparent); }
+.chip.o { background: #F59A3C; color: #2B1305; }
+.chip.b { background: #8FB8EA; color: #10233A; }
+.plate { flex: none; width: 118px; height: 118px; }
+
+h2 { font-family: var(--font-display); font-size: 18px; margin: 0; }
+.top { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; min-width: 0; box-shadow: var(--shadow); }
+.inputs { display: flex; flex-direction: column; gap: 16px; }
+
+.days { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.days .t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.days .t b { font-family: var(--font-display); font-size: 17px; }
+.days .t span { font-size: 13px; color: var(--muted); }
+.days .inp { width: 150px; }
+
+.panel { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 11px 14px; background: var(--accent-soft); }
+.ifms .panel-head { background: var(--ifms-soft); }
+.panel-head h3 { font-family: var(--font-display); font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.panel-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+.tag { font-family: var(--font-num); font-size: 11.5px; font-weight: 600; letter-spacing: .06em; padding: 2px 9px; border-radius: 99px; background: var(--accent); color: var(--surface); }
+.ifms .tag { background: var(--ifms); }
+.same { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--fg); cursor: pointer; }
+.same input { width: 18px; height: 18px; accent-color: var(--accent); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field > label { font-weight: 600; font-size: 13.5px; line-height: 1.35; }
+.field > label small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+
+.inp { display: flex; align-items: center; gap: 6px; border: 1.5px solid var(--line); border-radius: 11px; background: var(--field); padding-inline: 12px; transition: border-color .15s; }
+.inp:focus-within { border-color: var(--accent); outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.ifms .inp:focus-within { border-color: var(--ifms); outline-color: color-mix(in srgb, var(--ifms) 35%, transparent); }
+.inp input { font-family: var(--font-num); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; width: 100%; min-width: 0; padding-block: 9px; border: 0; background: transparent; color: var(--fg); outline: none; }
+.inp .u { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.inp.off { opacity: .55; }
+.avg { align-self: flex-start; font-size: 12.5px; color: var(--muted); background: var(--accent-soft); padding: 2px 10px; border-radius: 99px; }
+.ifms .avg { background: var(--ifms-soft); }
+.avg b { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 600; color: var(--accent); }
+.ifms .avg b { color: var(--ifms); }
+.adv { padding-top: 14px; border-top: 1px dashed var(--line); }
+.hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+/* result card */
+.total { background: var(--total-bg); color: var(--total-fg); border-color: var(--total-bg); display: flex; flex-direction: column; gap: 14px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); border-radius: 18px; }
+.total .lab { font-size: 13.5px; opacity: .92; }
+.total .big { font-family: var(--font-num); font-size: clamp(36px, 9vw, 50px); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; overflow-wrap: anywhere; margin-top: 2px; }
+.shares { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: color-mix(in srgb, var(--total-fg) 18%, transparent); }
+.shares i { display: block; height: 100%; transition: width .25s ease; }
+.shares i:first-child { background: var(--seg1); }
+.shares i:last-child { background: var(--seg2); }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.split div, .mini { min-width: 0; }
+.split span, .mini span { font-size: 12.5px; opacity: .9; display: flex; align-items: center; gap: 6px; }
+.split span::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--seg1); flex: none; }
+.split div:last-child span::before { background: var(--seg2); }
+.split b, .mini b { display: block; font-family: var(--font-num); font-size: 18px; font-variant-numeric: tabular-nums; font-weight: 600; overflow-wrap: anywhere; }
+.money { display: grid; grid-template-columns: 1fr; gap: 10px; border-top: 1px solid color-mix(in srgb, var(--total-fg) 26%, transparent); padding-top: 14px; }
+.sav { border-radius: 12px; padding: 12px 14px; background: color-mix(in srgb, #7FE0A3 20%, transparent); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.sav span { font-size: 13.5px; font-weight: 600; }
+.sav b { font-family: var(--font-num); font-size: clamp(24px, 6vw, 30px); font-weight: 600; font-variant-numeric: tabular-nums; color: #9BEDB8; }
+.sav.neg { background: color-mix(in srgb, #FF8B7E 22%, transparent); }
+.sav.neg b { color: #FFB1A8; }
+.copy { font: inherit; font-size: 14px; font-weight: 600; padding: 11px 14px; border-radius: 11px; border: 0; background: var(--total-fg); color: var(--total-bg); cursor: pointer; }
+.copy:hover { filter: brightness(.94); }
+.copy:focus-visible, .reset:focus-visible, summary:focus-visible { outline: 3px solid var(--seg1); outline-offset: 2px; }
+
+/* tables */
+.tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 16px; align-items: start; }
+.acct { padding: 0; overflow: hidden; }
+.acct-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 13px 18px; background: var(--accent-soft); }
+.ifms .acct-head { background: var(--ifms-soft); }
+.acct-body { padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+.rate-chip { font-family: var(--font-num); font-size: 12px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 11px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 10px 9px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; white-space: normal; }
+thead th { color: var(--muted); font-size: 12px; font-weight: 600; white-space: normal; line-height: 1.35; vertical-align: bottom; background: var(--field); }
+th small { display: block; font-weight: 500; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+td.n { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--field) 60%, transparent); }
+tbody tr:last-child td { border-bottom: 0; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: baseline; }
+tfoot td { font-weight: 700; border-bottom: 0; border-top: 2px solid var(--fg); }
+tfoot td.n { font-weight: 600; }
+
+.bal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.bal > div { min-width: 0; border-radius: 11px; padding: 9px 11px; background: var(--field); }
+.bal span { display: block; font-size: 12px; color: var(--muted); }
+.bal b { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.bal .pos { background: var(--good-soft); }
+.bal .neg { background: var(--bad-soft); }
+.bal .pos span, .bal .pos b { color: var(--good); }
+.bal .neg span, .bal .neg b { color: var(--bad); }
+.bal .pos span, .bal .neg span { font-weight: 600; }
+
+.clear { align-self: flex-start; font: inherit; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: 11px; border: 1.5px solid var(--bad); background: transparent; color: var(--bad); cursor: pointer; }
+.clear:hover { background: var(--bad-soft); }
+.clear.arm { background: var(--bad); color: var(--surface); }
+.clear:focus-visible { outline: 3px solid var(--bad); outline-offset: 2px; }
+.rate input[readonly] { background: transparent; border-color: transparent; cursor: default; font-weight: 600; }
+.admin { margin-top: 14px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 12px; display: flex; flex-direction: column; gap: 12px; }
+.a-out, .a-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.a-note { font-size: 13px; color: var(--muted); }
+.a-row b { color: var(--good); font-size: 14px; }
+.abtn { font: inherit; font-size: 13.5px; font-weight: 600; padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--accent); background: var(--accent); color: var(--surface); cursor: pointer; }
+.abtn.ghost { background: transparent; border-color: var(--line); color: var(--fg); }
+.abtn:hover { filter: brightness(.95); }
+.abtn:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+.a-login, .a-change { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+.a-change { border-top: 1px dashed var(--line); padding-top: 12px; }
+.a-change h4 { flex-basis: 100%; margin: 0; font-size: 14px; font-family: var(--font-display); }
+.a-login .f, .a-change .f { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 150px; }
+.a-login label, .a-change label { font-size: 12.5px; font-weight: 600; }
+.a-login input, .a-change input { font: inherit; font-size: 15px; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 9px; background: var(--field); color: var(--fg); width: 100%; min-width: 0; }
+.a-login input:focus-visible, .a-change input:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); border-color: var(--accent); }
+.a-msg { flex-basis: 100%; font-size: 13px; color: var(--bad); margin: 0; }
+.a-msg.ok { color: var(--good); }
+.a-msg:empty { display: none; }
+.a-in { display: flex; flex-direction: column; gap: 14px; }
+.dev { text-align: center; margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .06em; color: var(--bg-fg); }
+.sel { width: 100%; font: inherit; font-size: 16px; font-weight: 500; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 11px; background: var(--field); color: var(--fg); }
+.sel:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); border-color: var(--accent); }
+#cFind { font-size: 16px; font-weight: 500; }
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; box-shadow: var(--shadow); }
+summary { cursor: pointer; font-weight: 600; }
+.rates { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; margin-top: 14px; }
+.rate { display: grid; grid-template-columns: 1fr 84px 84px; gap: 8px; align-items: center; font-size: 14px; }
+.rate .h { font-size: 12px; color: var(--muted); font-weight: 700; }
+.rate .h:not(:first-child) { text-align: right; }
+.rate input { font-family: var(--font-num); font-size: 15px; width: 100%; padding: 5px 8px; border: 1.5px solid var(--line); border-radius: 7px; background: var(--field); color: var(--fg); font-variant-numeric: tabular-nums; }
+.rate input:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); border-color: var(--accent); }
+.reset { margin-top: 14px; font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 9px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.reset:hover { border-color: var(--accent); }
+.foot { font-size: 12.5px; color: var(--bg-muted); margin: 0; }
+
+.bar { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--total-bg); color: var(--total-fg); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 -6px 20px rgba(40, 15, 3, .35); }
+.bar div { min-width: 0; }
+.bar div:last-child { text-align: right; }
+.bar span { display: block; font-size: 12px; opacity: .9; }
+.bar b { font-family: var(--font-num); font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.bar .s b { color: #9BEDB8; }
+.bar .s.neg b { color: #FFB1A8; }
+
+@media (max-width: 800px) {
+  .top { grid-template-columns: 1fr; }
+  .total { position: static; }
+  body { padding-bottom: 88px; }
+  .bar.on { display: flex; }
+}
+@media (max-width: 560px) { .plate { width: 76px; height: 76px; } }
+@media (max-width: 420px) {
+  .card, .banner { padding: 14px; }
+  .acct-head, .acct-body { padding-inline: 14px; }
+  .row2 { gap: 10px; }
+  .inp input { font-size: 20px; }
+  .inp .u { display: none; }
+  .field.adv .inp .u { display: inline; }
+  .bal b { font-size: 13.5px; }
+  th, td { padding: 9px 5px; font-size: 13px; }
+  .plate { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .shares i, .inp { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="banner">
+    <div class="txt">
+      <h1>પીએમ પોષણ – ખર્ચ કેલ્ક્યુલેટર</h1>
+      <p>જનરલ હિસાબ-૧ (PFMS) અને જનરલ હિસાબ-૨ (IFMS) નો ખર્ચ અને બચત</p>
+      <div class="chips"><span class="chip">તા. ૧૩/૦૨/૨૦૨૫ થી અમલમાં દર</span><span class="chip o">બાલવાટિકા–૫</span><span class="chip b">ધોરણ ૬–૮</span></div>
+    </div>
+    <svg class="plate" viewBox="0 0 160 160" aria-hidden="true">
+      <circle cx="80" cy="80" r="77" fill="#F7C98B"/>
+      <circle cx="80" cy="80" r="64" fill="#FFF4E2"/>
+      <circle cx="57" cy="58" r="21" fill="#E9803A"/><circle cx="57" cy="58" r="12" fill="#F4A867"/>
+      <circle cx="104" cy="58" r="21" fill="#6FA55C"/><circle cx="104" cy="58" r="12" fill="#97C686"/>
+      <circle cx="57" cy="104" r="21" fill="#E0B13F"/><circle cx="57" cy="104" r="12" fill="#F0CE74"/>
+      <circle cx="104" cy="104" r="21" fill="#C8553D"/><circle cx="104" cy="104" r="12" fill="#E08670"/>
+    </svg>
+  </header>
+
+  <section class="top">
+    <div class="card inputs">
+      <div class="field" id="centerBox" hidden>
+        <label for="cFind">કેન્દ્ર પસંદ કરો<small>પસંદ કરતાં જ મળેલ પેશગી અને અગાઉના માસની બચત આપોઆપ ભરાશે</small></label>
+        <div class="inp"><input id="cFind" type="search" placeholder="કેન્દ્રનું નામ કે કોડ શોધો" autocomplete="off"></div>
+        <select id="cSel" class="sel" aria-label="કેન્દ્ર"></select>
+        <span class="avg" id="cInfo"></span>
+        <span class="avg" id="cMsg" style="color:#b91c1c"></span>
+        <label class="sel" style="display:block;text-align:center;cursor:pointer;margin-top:8px;font-size:14px">📂 CSV ફાઈલમાંથી કેન્દ્રોની યાદી ભરો<input id="cFile" type="file" accept=".csv,text/csv,text/plain,.txt" style="display:none"></label>
+      </div>
+      <div class="days">
+        <div class="t">
+          <b>દિવસ સંખ્યા</b>
+          <span>સરેરાશ દૈનિક સંખ્યા આ દિવસો પ્રમાણે ગણાશે</span>
+        </div>
+        <div class="inp"><input id="days" type="number" inputmode="numeric" min="1" step="1" value="25" aria-label="દિવસ સંખ્યા"><span class="u">દિવસ</span></div>
+      </div>
+
+      <div class="panel" id="p1">
+        <div class="panel-head"><h3>જનરલ હિસાબ-૧ <span class="tag">PFMS</span></h3></div>
+        <div class="panel-body">
+          <div class="row2">
+            <div class="field">
+              <label for="n1">બાલવાટિકા થી ધોરણ ૫<small>કુલ લાભાર્થી</small></label>
+              <div class="inp"><input id="n1" type="number" inputmode="numeric" min="0" step="1" value="3000"><span class="u">વિ.</span></div>
+              <span class="avg">સરેરાશ દૈનિક <b id="av-n1">0</b></span>
+            </div>
+            <div class="field">
+              <label for="n2">ધોરણ ૬ થી ૮<small>કુલ લાભાર્થી</small></label>
+              <div class="inp"><input id="n2" type="number" inputmode="numeric" min="0" step="1" value="2000"><span class="u">વિ.</span></div>
+              <span class="avg">સરેરાશ દૈનિક <b id="av-n2">0</b></span>
+            </div>
+          </div>
+          <div class="field adv">
+            <label for="adv1">મળેલ પેશગી</label>
+            <div class="inp"><span class="u">₹</span><input id="adv1" type="number" inputmode="decimal" min="0" step="0.01" value="25000"></div>
+            <label for="prev1" style="margin-top:6px">અગાઉના માસની બચત</label>
+            <div class="inp"><span class="u">₹</span><input id="prev1" type="number" inputmode="decimal" min="0" step="0.01" value="1200"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel ifms" id="p2">
+        <div class="panel-head">
+          <h3>જનરલ હિસાબ-૨ <span class="tag">IFMS</span></h3>
+          <label class="same" for="same"><input id="same" type="checkbox"> હિસાબ-૧ જેટલી જ સંખ્યા</label>
+        </div>
+        <div class="panel-body">
+          <div class="row2">
+            <div class="field">
+              <label for="m1">બાલવાટિકા થી ધોરણ ૫<small>કુલ લાભાર્થી</small></label>
+              <div class="inp" id="w-m1"><input id="m1" type="number" inputmode="numeric" min="0" step="1" value="3000"><span class="u">વિ.</span></div>
+              <span class="avg">સરેરાશ દૈનિક <b id="av-m1">0</b></span>
+            </div>
+            <div class="field">
+              <label for="m2">ધોરણ ૬ થી ૮<small>કુલ લાભાર્થી</small></label>
+              <div class="inp" id="w-m2"><input id="m2" type="number" inputmode="numeric" min="0" step="1" value="2000"><span class="u">વિ.</span></div>
+              <span class="avg">સરેરાશ દૈનિક <b id="av-m2">0</b></span>
+            </div>
+          </div>
+          <div class="field adv">
+            <label for="adv2">મળેલ પેશગી</label>
+            <div class="inp"><span class="u">₹</span><input id="adv2" type="number" inputmode="decimal" min="0" step="0.01" value="9000"></div>
+            <label for="prev2" style="margin-top:6px">અગાઉના માસની બચત</label>
+            <div class="inp"><span class="u">₹</span><input id="prev2" type="number" inputmode="decimal" min="0" step="0.01" value="400"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="hint">મહિનાના કુલ લાભાર્થી અને મળેલ પેશગી લખો. ભરેલી સંખ્યાઓ ઉદાહરણ છે, તમારી સંખ્યા લખો.</p>
+      <button class="clear" id="clear" type="button">ડેટા ક્લિયર કરો</button>
+    </div>
+
+    <div class="card total" id="totalCard" aria-live="polite">
+      <div>
+        <div class="lab" id="cName" hidden style="font-weight:600;margin-bottom:4px"></div>
+        <div class="lab" id="totalLab">કુલ ખર્ચ</div>
+        <div class="big" id="grand">₹ 0.00</div>
+      </div>
+      <div class="shares" aria-hidden="true"><i id="s1" style="width:50%"></i><i id="s2" style="width:50%"></i></div>
+      <div class="split">
+        <div><span>હિસાબ-૧ (PFMS)</span><b id="g1">₹ 0.00</b></div>
+        <div><span>હિસાબ-૨ (IFMS)</span><b id="g2">₹ 0.00</b></div>
+      </div>
+      <div class="money">
+        <div class="mini"><span>કુલ મળેલ પેશગી</span><b id="advTot">₹ 0.00</b></div>
+        <div class="mini"><span>અગાઉના માસની કુલ બચત</span><b id="prevTot">₹ 0.00</b></div>
+        <div class="sav" id="savBox"><span id="savLab">કુલ બચત</span><b id="sav">₹ 0.00</b></div>
+        <div class="mini"><span id="perdayLab">સરેરાશ દૈનિક ખર્ચ</span><b id="perday">₹ 0.00</b></div>
+      </div>
+      <button class="copy" id="copy" type="button">પરિણામ કોપી કરો</button>
+    </div>
+  </section>
+
+  <section class="tables">
+    <div class="card acct" id="a1"></div>
+    <div class="card acct ifms" id="a2"></div>
+  </section>
+
+  <details id="ratesBox">
+    <summary>દરો (₹ પ્રતિ વિદ્યાર્થી પ્રતિ દિવસ)</summary>
+
+    <div class="admin" id="gBox" hidden>
+      <div class="a-row">
+        <span class="a-note">દરો Google Sheet માંથી આવે છે. ફક્ત એડમિન શીટમાં દર બદલી શકે છે.</span>
+        <button class="abtn ghost" id="gRefresh" type="button">હમણાં તાજું કરો</button>
+      </div>
+      <p class="a-note" id="gStatus" style="margin:0"></p>
+    </div>
+
+    <div class="admin" id="sBox" hidden>
+      <span class="a-note" id="sNote"></span>
+      <div class="a-row" id="sAct" hidden>
+        <button class="abtn" id="sSave" type="button">દરો સેવ કરો (બધા માટે)</button>
+        <button class="abtn ghost" id="sReset" type="button">મૂળ દરો પાછા લાવો</button>
+      </div>
+      <p class="a-msg" id="sMsg" role="alert"></p>
+    </div>
+
+    <div class="admin" id="localAdmin">
+      <div class="a-out" id="aOut">
+        <span class="a-note">દરો ફક્ત એડમિન બદલી શકે છે.</span>
+        <button class="abtn" id="aOpen" type="button">એડમિન લોગિન</button>
+      </div>
+
+      <form class="a-login" id="aLogin" hidden>
+        <div class="f">
+          <label for="aPass">એડમિન પાસવર્ડ</label>
+          <input id="aPass" type="password" autocomplete="current-password">
+        </div>
+        <button class="abtn" type="submit">લોગિન</button>
+        <button class="abtn ghost" id="aCancel" type="button">રદ કરો</button>
+        <p class="a-msg" id="aErr" role="alert"></p>
+      </form>
+
+      <div class="a-in" id="aIn" hidden>
+        <div class="a-row">
+          <b>એડમિન મોડ ચાલુ છે. દરો નીચે બદલી શકાય છે.</b>
+          <button class="abtn ghost" id="aOut2" type="button">લોગઆઉટ</button>
+        </div>
+        <form class="a-change" id="aChange">
+          <h4>પાસવર્ડ બદલો</h4>
+          <div class="f"><label for="aOld">જૂનો પાસવર્ડ</label><input id="aOld" type="password" autocomplete="current-password"></div>
+          <div class="f"><label for="aNew">નવો પાસવર્ડ</label><input id="aNew" type="password" autocomplete="new-password"></div>
+          <div class="f"><label for="aNew2">નવો પાસવર્ડ ફરી લખો</label><input id="aNew2" type="password" autocomplete="new-password"></div>
+          <button class="abtn" type="submit">પાસવર્ડ બદલો</button>
+          <p class="a-msg" id="aMsg" role="alert"></p>
+        </form>
+        <div><button class="reset" id="reset" type="button" style="margin-top:0">મૂળ દરો પાછા લાવો</button></div>
+      </div>
+    </div>
+
+    <div class="rates" id="rates"></div>
+  </details>
+
+  <p class="foot">ખર્ચ = કુલ લાભાર્થી × દર. બચત = મળેલ પેશગી + અગાઉના માસની બચત − થયેલ ખર્ચ. કુલ ખર્ચ દરેક હિસાબના કુલ દર મુજબ ગણાય છે. ભરેલી સંખ્યાઓ ફક્ત આ બ્રાઉઝરમાં યાદ રહે છે.</p>
+  <p class="dev">Developed by <b>MDM VIJAYNAGAR</b></p>
+</div>
+
+<div class="bar on" id="bar">
+  <div><span id="barLab">કુલ ખર્ચ</span><b id="barAmt">₹ 0.00</b></div>
+  <div class="s" id="barS"><span id="barSLab">બચત</span><b id="barSav">₹ 0.00</b></div>
+</div>
+
+<script>
+(function () {
+  var DEFAULTS = {
+    a1: { title: 'જનરલ હિસાબ-૧', tag: 'PFMS', total: [3.93, 5.88], items: [
+      ['શાકભાજી', 1.50, 2.00],
+      ['મરી મસાલા', 0.97, 1.50],
+      ['દળામણ', 0.34, 0.51],
+      ['બળતણ-ગેસ', 1.00, 1.70]
+    ]},
+    a2: { title: 'જનરલ હિસાબ-૨', tag: 'IFMS', total: [1.34, 2.03], items: [
+      ['શાકભાજી', 0.56, 0.76],
+      ['મરી મસાલા', 0.45, 0.75],
+      ['દળામણ', 0.08, 0.13],
+      ['બળતણ-ગેસ', 0.25, 0.39]
+    ]}
+  };
+  var DOTS = ['#5FA85B', '#D8473B', '#C99A55', '#4C86C7'];
+  var rates = JSON.parse(JSON.stringify(DEFAULTS));
+  var KEY = 'mdm-calc-v3';
+  var IDS = ['days', 'n1', 'n2', 'm1', 'm2', 'adv1', 'adv2', 'prev1', 'prev2'];
+  var $ = function (id) { return document.getElementById(id); };
+  var summary = '';
+
+  // Admin login. The check runs inside this page, so it keeps casual users out of the rates
+  // but is not strong security against someone who knows how to inspect the page.
+  var ADMIN_KEY = 'mdm-admin-v1';
+  var admin = false, dirty = false, sharedOn = false, sharedRef = null;
+
+  // Link of the published Google Sheet (File > Share > Publish to web > CSV). Leave empty to
+  // keep rates local to the phone.
+  var SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1xxZVZjiFmueeW7ipkoIQa22zaAq_tRyImMXCPQjBxCOJ4NqUVP-Xw62QUOU32Q/pub?gid=2023396377&single=true&output=csv';
+  var RKEY = 'mdm-rates-remote-v1';
+  var sheetOn = false, lastFetch = 0, lastOk = '';
+
+  // Link of the published "કેન્દ્રો" tab (CSV): one row per centre with its advance and the
+  // previous month's savings. Leave empty to hide the centre picker.
+  var CENTER_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXUmm7NufV28OzvQnA_qU8l9cVBSL_VqmyMS95kDxsdYk-eMOzliqxYcSWFHk6hA/pub?gid=120282419&single=true&output=csv';
+  var CKEY = 'mdm-centers-v1', CSEL = 'mdm-center-sel';
+  var centers = [], curCenter = null, manualAdv = false, lastCFetch = 0;
+  function hashPw(p) {
+    p = 'mdm-vijaynagar|' + p;
+    var a = 0xdeadbeef, b = 0x41c6ce57;
+    for (var i = 0; i < p.length; i++) {
+      var c = p.charCodeAt(i);
+      a = Math.imul(a ^ c, 2654435761);
+      b = Math.imul(b ^ c, 1597334677);
+    }
+    a = Math.imul(a ^ (a >>> 16), 2246822507) ^ Math.imul(b ^ (b >>> 13), 3266489909);
+    b = Math.imul(b ^ (b >>> 16), 2246822507) ^ Math.imul(a ^ (a >>> 13), 3266489909);
+    return String(4294967296 * (2097151 & b) + (a >>> 0));
+  }
+  var passHash = hashPw('admin123');
+  try { var sp = localStorage.getItem(ADMIN_KEY); if (sp) passHash = sp; } catch (e) {}
+
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved) {
+      if (saved.rates && saved.rates.a1 && saved.rates.a2) {
+        rates = saved.rates;
+        rates.a1.tag = 'PFMS'; rates.a2.tag = 'IFMS';
+        rates.a1.title = DEFAULTS.a1.title; rates.a2.title = DEFAULTS.a2.title;
+      }
+      IDS.forEach(function (id) { if (saved[id] != null) $(id).value = saved[id]; });
+      if (saved.same) $('same').checked = true;
+    }
+  } catch (e) {}
+
+  function num(v) { var x = parseFloat(v); return isFinite(x) && x > 0 ? x : 0; }
+  function whole(id) { return Math.floor(num($(id).value)); }
+  function fmt(x) { return x.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function cnt(x) { return x.toLocaleString('en-IN', { maximumFractionDigits: 2 }); }
+  function rup(x) { return '₹ ' + fmt(x); }
+
+  function save() {
+    try {
+      var o = { rates: rates, same: $('same').checked };
+      IDS.forEach(function (id) { o[id] = $(id).value; });
+      localStorage.setItem(KEY, JSON.stringify(o));
+    } catch (e) {}
+  }
+
+  function syncSame() {
+    var on = $('same').checked;
+    $('m1').disabled = on;
+    $('m2').disabled = on;
+    $('w-m1').classList.toggle('off', on);
+    $('w-m2').classList.toggle('off', on);
+    if (on) { $('m1').value = $('n1').value; $('m2').value = $('n2').value; }
+  }
+
+  function balHtml(adv, prev, spent) {
+    var b = Math.round((adv + prev - spent) * 100) / 100;
+    return '<div class="bal">' +
+      '<div><span>મળેલ પેશગી</span><b>' + rup(adv) + '</b></div>' +
+      '<div><span>અગાઉના માસની બચત</span><b>' + rup(prev) + '</b></div>' +
+      '<div><span>થયેલ ખર્ચ</span><b>' + rup(spent) + '</b></div>' +
+      '<div class="' + (b < 0 ? 'neg' : 'pos') + '"><span>' + (b < 0 ? 'ખૂટતી રકમ' : 'બચત') + '</span><b>' + rup(Math.abs(b)) + '</b></div>' +
+      '</div>';
+  }
+
+  function renderAccount(host, key, c1, c2, d, adv, prev) {
+    var a = rates[key], t1 = 0, t2 = 0, r1 = 0, r2 = 0, rows = '';
+    a.items.forEach(function (it, i) {
+      var x1 = it[1] * c1, x2 = it[2] * c2;
+      t1 += x1; t2 += x2; r1 += it[1]; r2 += it[2];
+      rows += '<tr><td><i class="dot" style="background:' + DOTS[i % DOTS.length] + '"></i>' + it[0] + '</td><td class="n">' + fmt(x1) + '</td><td class="n">' + fmt(x2) + '</td><td class="n">' + fmt(x1 + x2) + '</td></tr>';
+    });
+    var o1 = a.total ? a.total[0] : r1, o2 = a.total ? a.total[1] : r2;
+    var y1 = Math.round((o1 - r1) * 100) / 100, y2 = Math.round((o2 - r2) * 100) / 100;
+    if (Math.abs(y1) > 0.004 || Math.abs(y2) > 0.004) { t1 += y1 * c1; t2 += y2 * c2; }
+    host.innerHTML =
+      '<div class="acct-head"><h2>' + a.title + ' <span class="tag">' + a.tag + '</span></h2><span class="rate-chip">દર: ₹ ' + fmt(o1) + ' / ₹ ' + fmt(o2) + '</span></div>' +
+      '<div class="acct-body"><div class="scroll"><table><thead><tr><th>વસ્તુ</th>' +
+      '<th>બાલવાટિકા થી ૫<small>કુલ ' + cnt(c1) + ' · સરેરાશ ' + cnt(d ? c1 / d : 0) + '</small></th>' +
+      '<th>ધોરણ ૬ થી ૮<small>કુલ ' + cnt(c2) + ' · સરેરાશ ' + cnt(d ? c2 / d : 0) + '</small></th>' +
+      '<th>કુલ ₹</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+      '<tfoot><tr><td>કુલ</td><td class="n">' + fmt(t1) + '</td><td class="n">' + fmt(t2) + '</td><td class="n">' + fmt(t1 + t2) + '</td></tr></tfoot></table></div>' + balHtml(adv, prev, t1 + t2) + '</div>';
+    return t1 + t2;
+  }
+
+  function update() {
+    syncSame();
+    var d = Math.max(1, whole('days'));
+    var n1 = whole('n1'), n2 = whole('n2'), m1 = whole('m1'), m2 = whole('m2');
+    $('av-n1').textContent = cnt(n1 / d);
+    $('av-n2').textContent = cnt(n2 / d);
+    $('av-m1').textContent = cnt(m1 / d);
+    $('av-m2').textContent = cnt(m2 / d);
+    var av1 = num($('adv1').value), av2 = num($('adv2').value);
+    var pv1 = num($('prev1').value), pv2 = num($('prev2').value);
+    var s1 = renderAccount($('a1'), 'a1', n1, n2, d, av1, pv1);
+    var s2 = renderAccount($('a2'), 'a2', m1, m2, d, av2, pv2);
+    var all = s1 + s2;
+    $('grand').textContent = rup(all);
+    $('g1').textContent = rup(s1);
+    $('g2').textContent = rup(s2);
+    var p1 = all > 0 ? Math.round(s1 / all * 1000) / 10 : 50;
+    $('s1').style.width = p1 + '%';
+    $('s2').style.width = (100 - p1) + '%';
+    $('totalLab').textContent = 'કુલ ખર્ચ, ' + d + ' દિવસ';
+    $('perdayLab').textContent = 'સરેરાશ દૈનિક ખર્ચ (' + d + ' દિવસે ભાગતાં)';
+    $('perday').textContent = rup(all / d);
+    var advAll = av1 + av2, prevAll = pv1 + pv2, sv = Math.round((advAll + prevAll - all) * 100) / 100;
+    $('advTot').textContent = rup(advAll);
+    $('prevTot').textContent = rup(prevAll);
+    $('savLab').textContent = sv < 0 ? 'કુલ ખૂટતી રકમ (ખર્ચ − પેશગી − અગાઉની બચત)' : 'કુલ બચત (પેશગી + અગાઉની બચત − ખર્ચ)';
+    $('sav').textContent = rup(Math.abs(sv));
+    $('savBox').classList.toggle('neg', sv < 0);
+    $('barLab').textContent = 'કુલ ખર્ચ, ' + d + ' દિવસ';
+    $('barAmt').textContent = rup(all);
+    $('barSLab').textContent = sv < 0 ? 'ખૂટતી રકમ' : 'બચત';
+    $('barSav').textContent = rup(Math.abs(sv));
+    $('barS').classList.toggle('neg', sv < 0);
+    summary = (curCenter ? 'કેન્દ્ર: ' + curCenter.name + '\n' : '') + 'પીએમ પોષણ ખર્ચ, ' + d + ' દિવસ\n' +
+      'હિસાબ-૧ (PFMS): ' + rup(s1) + '  (બાલવાટિકા થી ૫: ' + cnt(n1) + ', ધોરણ ૬ થી ૮: ' + cnt(n2) + ')\n' +
+      'હિસાબ-૨ (IFMS): ' + rup(s2) + '  (બાલવાટિકા થી ૫: ' + cnt(m1) + ', ધોરણ ૬ થી ૮: ' + cnt(m2) + ')\n' +
+      'કુલ ખર્ચ: ' + rup(all) + '\n' +
+      'મળેલ પેશગી: ' + rup(advAll) + '\n' +
+      'અગાઉના માસની બચત: ' + rup(prevAll) + '\n' +
+      (sv < 0 ? 'ખૂટતી રકમ: ' : 'બચત: ') + rup(Math.abs(sv)) + '\n' +
+      'સરેરાશ દૈનિક ખર્ચ: ' + rup(all / d);
+    save();
+  }
+
+  function buildRates() {
+    var host = $('rates');
+    host.innerHTML = '';
+    ['a1', 'a2'].forEach(function (key) {
+      var box = document.createElement('div');
+      box.innerHTML = '<h2 style="font-size:15px;margin-bottom:8px">' + rates[key].title + ' (' + rates[key].tag + ')</h2><div class="rate"><span class="h">વસ્તુ</span><span class="h">બાલ. થી ૫</span><span class="h">ધો. ૬ થી ૮</span></div>';
+      rates[key].items.forEach(function (it, i) {
+        var row = document.createElement('div');
+        row.className = 'rate';
+        row.style.marginTop = '6px';
+        row.innerHTML = '<label for="r-' + key + '-' + i + '-1">' + it[0] + '</label>' +
+          '<input id="r-' + key + '-' + i + '-1" type="number" inputmode="decimal" step="0.01" min="0" value="' + it[1] + '" aria-label="' + it[0] + ' બાલવાટિકા થી ૫">' +
+          '<input id="r-' + key + '-' + i + '-2" type="number" inputmode="decimal" step="0.01" min="0" value="' + it[2] + '" aria-label="' + it[0] + ' ધોરણ ૬ થી ૮">';
+        row.querySelectorAll('input').forEach(function (inp, j) {
+          inp.addEventListener('input', function () { dirty = true; rates[key].items[i][j + 1] = num(inp.value); update(); });
+        });
+        box.appendChild(row);
+      });
+      var tr = document.createElement('div');
+      tr.className = 'rate';
+      tr.style.marginTop = '10px';
+      tr.innerHTML = '<label for="r-' + key + '-t-1"><b>કુલ દર</b></label>' +
+        '<input id="r-' + key + '-t-1" type="number" inputmode="decimal" step="0.01" min="0" value="' + rates[key].total[0] + '" aria-label="કુલ દર બાલવાટિકા થી ૫">' +
+        '<input id="r-' + key + '-t-2" type="number" inputmode="decimal" step="0.01" min="0" value="' + rates[key].total[1] + '" aria-label="કુલ દર ધોરણ ૬ થી ૮">';
+      tr.querySelectorAll('input').forEach(function (inp, j) {
+        inp.addEventListener('input', function () { dirty = true; rates[key].total[j] = num(inp.value); update(); });
+      });
+      box.appendChild(tr);
+      host.appendChild(box);
+    });
+    host.querySelectorAll('input').forEach(function (inp) { inp.readOnly = !admin; });
+  }
+
+  function showAdmin(state) {
+    $('aOut').hidden = state !== 'out';
+    $('aLogin').hidden = state !== 'login';
+    $('aIn').hidden = state !== 'in';
+    admin = state === 'in';
+    buildRates();
+  }
+
+  function copyResult() {
+    var btn = $('copy');
+    function done(ok) {
+      btn.textContent = ok ? 'કોપી થયું' : 'કોપી ન થયું, લખાણ પસંદ કરીને કોપી કરો';
+      setTimeout(function () { btn.textContent = 'પરિણામ કોપી કરો'; }, 1800);
+    }
+    try {
+      navigator.clipboard.writeText(summary).then(function () { done(true); }, function () { done(false); });
+    } catch (e) { done(false); }
+  }
+
+  IDS.forEach(function (id) { $(id).addEventListener('input', update); });
+  $('same').addEventListener('change', update);
+  $('copy').addEventListener('click', copyResult);
+
+  var clearTimer = null;
+  function disarmClear(label) {
+    var b = $('clear');
+    b.classList.remove('arm');
+    b.textContent = label || 'ડેટા ક્લિયર કરો';
+  }
+  $('clear').addEventListener('click', function () {
+    var b = $('clear');
+    if (!b.classList.contains('arm')) {
+      b.classList.add('arm');
+      b.textContent = 'ખરેખર ભૂંસવું? ફરી દબાવો';
+      clearTimer = setTimeout(function () { disarmClear(); }, 3500);
+      return;
+    }
+    clearTimeout(clearTimer);
+    IDS.forEach(function (id) { $(id).value = ''; });
+    $('same').checked = false;
+    curCenter = null; manualAdv = false;
+    try { localStorage.removeItem(CSEL); } catch (e) {}
+    if (!$('centerBox').hidden) { $('cSel').value = ''; $('cName').hidden = true; $('cInfo').textContent = ''; }
+    update();
+    disarmClear('ડેટા ભૂંસાઈ ગયો');
+    setTimeout(function () { disarmClear(); }, 1800);
+  });
+  $('reset').addEventListener('click', function () {
+    if (!admin) return;
+    rates = JSON.parse(JSON.stringify(DEFAULTS));
+    buildRates();
+    update();
+  });
+
+  $('aOpen').addEventListener('click', function () {
+    $('aErr').textContent = '';
+    showAdmin('login');
+    $('aPass').focus();
+  });
+  $('aCancel').addEventListener('click', function () {
+    $('aPass').value = '';
+    $('aErr').textContent = '';
+    showAdmin('out');
+  });
+  $('aLogin').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (hashPw($('aPass').value) === passHash) {
+      $('aPass').value = '';
+      $('aErr').textContent = '';
+      $('aMsg').textContent = '';
+      showAdmin('in');
+    } else {
+      $('aErr').textContent = 'પાસવર્ડ ખોટો છે. ફરી પ્રયત્ન કરો.';
+      $('aPass').select();
+    }
+  });
+  $('aOut2').addEventListener('click', function () { showAdmin('out'); });
+  $('aChange').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var msg = $('aMsg');
+    msg.className = 'a-msg';
+    if (!admin) return;
+    if (hashPw($('aOld').value) !== passHash) { msg.textContent = 'જૂનો પાસવર્ડ ખોટો છે.'; return; }
+    var n1 = $('aNew').value, n2 = $('aNew2').value;
+    if (n1.length < 4) { msg.textContent = 'નવો પાસવર્ડ ઓછામાં ઓછા ૪ અક્ષરનો રાખો.'; return; }
+    if (n1 !== n2) { msg.textContent = 'બન્ને નવા પાસવર્ડ સરખા નથી.'; return; }
+    passHash = hashPw(n1);
+    var stored = true;
+    try { localStorage.setItem(ADMIN_KEY, passHash); } catch (err) { stored = false; }
+    $('aOld').value = ''; $('aNew').value = ''; $('aNew2').value = '';
+    msg.className = 'a-msg ok';
+    msg.textContent = stored ? 'પાસવર્ડ બદલાઈ ગયો.' : 'પાસવર્ડ બદલાયો, પણ આ બ્રાઉઝરમાં સાચવી શકાયો નથી, એટલે પેજ ફરી ખોલતાં જૂનો પાસવર્ડ ચાલશે.';
+  });
+
+  try {
+    new IntersectionObserver(function (es) {
+      $('bar').classList.toggle('on', !es[0].isIntersecting);
+    }).observe($('totalCard'));
+  } catch (e) {}
+
+  // Shared rates: when the page runs on claude.ai with its database, every viewer reads the
+  // rates from one document and only an editor/owner can save them. Elsewhere (APK, plain
+  // HTML file) this stays off and the local admin password above is used.
+  function initShared() {
+    try {
+      if (!window.claude || !claude.use) { initSheet(); return; }
+      Promise.all([claude.use('db'), claude.use('user')]).then(function (r) {
+        var db = r[0], user = r[1];
+        if (!db) { initSheet(); return; }
+        return Promise.resolve(user ? user.canEdit() : false).catch(function () { return false; }).then(function (isAdm) {
+          sharedOn = true;
+          sharedRef = db.doc('config/rates');
+          admin = !!isAdm;
+          $('localAdmin').hidden = true;
+          $('sBox').hidden = false;
+          $('sAct').hidden = !admin;
+          $('sNote').textContent = admin
+            ? 'તમે એડમિન છો. દરો બદલીને "દરો સેવ કરો" દબાવો, એટલે બધાને નવા દર આપોઆપ લાગુ પડશે.'
+            : 'દરો ફક્ત એડમિન બદલી શકે છે. એડમિન ફેરફાર કરે એટલે બધાને નવા દર આપોઆપ મળે છે.';
+          sharedRef.onSnapshot(function (snap) {
+            if (dirty) return;
+            var d = snap.exists ? snap.data() : null;
+            if (d && d.rates && d.rates.a1 && d.rates.a2) {
+              rates = JSON.parse(JSON.stringify(d.rates));
+              rates.a1.title = DEFAULTS.a1.title; rates.a1.tag = 'PFMS';
+              rates.a2.title = DEFAULTS.a2.title; rates.a2.tag = 'IFMS';
+            } else {
+              rates = JSON.parse(JSON.stringify(DEFAULTS));
+            }
+            buildRates();
+            update();
+          }, function () {
+            $('sMsg').className = 'a-msg';
+            $('sMsg').textContent = 'સહિયારા દરો લાવી શકાયા નથી. આ ફોનમાં સચવાયેલા દરો વપરાય છે.';
+          });
+        });
+      }).catch(function () { if (!sharedOn) initSheet(); });
+    } catch (e) { initSheet(); }
+  }
+
+  function parseCSV(text) {
+    var rows = [], row = [], cur = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) {
+        if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+        else cur += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === ',') { row.push(cur); cur = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(cur); cur = ''; rows.push(row); row = [];
+      } else cur += ch;
+    }
+    if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+    return rows;
+  }
+
+  // Sheet layout: column A = PFMS or IFMS, B = item name (or "કુલ દર" for the total row),
+  // C = Balvatika to 5 rate, D = Std 6 to 8 rate.
+  function parseRates(text) {
+    var out = { a1: { title: DEFAULTS.a1.title, tag: 'PFMS', total: null, items: [] },
+                a2: { title: DEFAULTS.a2.title, tag: 'IFMS', total: null, items: [] } };
+    parseCSV(text).forEach(function (r) {
+      var code = String(r[0] || '').trim().toUpperCase();
+      var key = code === 'PFMS' ? 'a1' : code === 'IFMS' ? 'a2' : null;
+      if (!key) return;
+      var label = String(r[1] || '').trim();
+      var x = parseFloat(String(r[2] || '').replace(/,/g, '')), y = parseFloat(String(r[3] || '').replace(/,/g, ''));
+      if (!label || !isFinite(x) || !isFinite(y) || x < 0 || y < 0) return;
+      if (/^(કુલ|total)/i.test(label)) out[key].total = [x, y];
+      else out[key].items.push([label, x, y]);
+    });
+    var ok = true;
+    ['a1', 'a2'].forEach(function (k) {
+      var a = out[k];
+      if (!a.items.length) { ok = false; return; }
+      if (!a.total) a.total = [
+        Math.round(a.items.reduce(function (s, it) { return s + it[1]; }, 0) * 100) / 100,
+        Math.round(a.items.reduce(function (s, it) { return s + it[2]; }, 0) * 100) / 100
+      ];
+    });
+    return ok ? out : null;
+  }
+
+  function stamp(d) {
+    try { return d.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+    catch (e) { return d.toISOString().slice(0, 16).replace('T', ' '); }
+  }
+  function sheetStatus(kind) {
+    var t = $('gStatus');
+    if (kind === 'ok') t.textContent = 'દરો Google Sheet માંથી તાજા કર્યા: ' + lastOk;
+    else if (lastOk) t.textContent = 'ઇન્ટરનેટ કે શીટ મળી નથી. છેલ્લે ' + lastOk + ' એ મેળવેલા દરો વપરાય છે.';
+    else t.textContent = 'ઇન્ટરનેટ કે શીટ મળી નથી. મૂળ દરો વપરાય છે.';
+  }
+
+  function fetchSheet(force) {
+    var now = Date.now();
+    if (!force && now - lastFetch < 60000) return;
+    lastFetch = now;
+    var url = SHEET_CSV_URL + (SHEET_CSV_URL.indexOf('?') > -1 ? '&' : '?') + 't=' + now;
+    fetch(url, { credentials: 'omit' }).then(function (r) {
+      if (!r.ok) throw new Error('http');
+      return r.text();
+    }).then(function (txt) {
+      var p = parseRates(txt);
+      if (!p) throw new Error('format');
+      rates = p;
+      lastOk = stamp(new Date());
+      try { localStorage.setItem(RKEY, JSON.stringify({ rates: p, at: lastOk })); } catch (e) {}
+      sheetStatus('ok');
+      buildRates();
+      update();
+    }).catch(function () { sheetStatus('fail'); });
+  }
+
+  function initSheet() {
+    if (sheetOn || sharedOn || !SHEET_CSV_URL) return;
+    sheetOn = true;
+    admin = false;
+    $('localAdmin').hidden = true;
+    $('gBox').hidden = false;
+    try {
+      var c = JSON.parse(localStorage.getItem(RKEY) || 'null');
+      if (c && c.rates && c.rates.a1 && c.rates.a2) { rates = c.rates; lastOk = c.at || ''; }
+      else rates = JSON.parse(JSON.stringify(DEFAULTS));
+    } catch (e) { rates = JSON.parse(JSON.stringify(DEFAULTS)); }
+    $('gStatus').textContent = 'દરો મેળવાય છે...';
+    buildRates();
+    update();
+    fetchSheet(true);
+    $('gRefresh').addEventListener('click', function () { fetchSheet(true); });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) fetchSheet(false); });
+  }
+
+  // Centre sheet layout: A = code, B = centre name, C = PFMS advance, D = IFMS advance,
+  // E = PFMS previous-month savings, F = IFMS previous-month savings.
+  function parseCenters(text) {
+    var out = [];
+    parseCSV(text).forEach(function (r) {
+      var name = String(r[1] || '').trim();
+      if (!name) return;
+      var v = [2, 3, 4, 5].map(function (i) {
+        var x = parseFloat(String(r[i] || '').replace(/[^0-9.\-]/g, ''));
+        return isFinite(x) ? x : null;
+      });
+      if (v.every(function (x) { return x === null; })) return;
+      var code = String(r[0] || '').trim();
+      out.push({ id: code || name, code: code, name: name, adv1: v[0] || 0, adv2: v[1] || 0, prev1: v[2] || 0, prev2: v[3] || 0 });
+    });
+    return out.length ? out : null;
+  }
+
+  function fillCenterList() {
+    var f = $('cFind').value.trim().toLowerCase();
+    var sel = $('cSel'), keep = curCenter ? curCenter.id : sel.value;
+    sel.innerHTML = '';
+    var first = document.createElement('option');
+    first.value = ''; first.textContent = '— કેન્દ્ર પસંદ કરો (' + centers.length + ') —';
+    sel.appendChild(first);
+    centers.forEach(function (c) {
+      if (f && (c.name + ' ' + c.code).toLowerCase().indexOf(f) < 0 && c.id !== keep) return;
+      var o = document.createElement('option');
+      o.value = c.id; o.textContent = (c.code ? c.code + ' – ' : '') + c.name;
+      sel.appendChild(o);
+    });
+    sel.value = keep;
+    if (sel.value !== keep) sel.value = '';
+  }
+
+  function selectCenter(id, fromRefresh) {
+    var c = null;
+    centers.forEach(function (x) { if (x.id === id) c = x; });
+    curCenter = c;
+    try { localStorage.setItem(CSEL, c ? c.id : ''); } catch (e) {}
+    $('cSel').value = c ? c.id : '';
+    var nm = $('cName');
+    if (!c) { nm.hidden = true; $('cInfo').textContent = ''; update(); return; }
+    nm.hidden = false;
+    nm.textContent = 'કેન્દ્ર: ' + c.name;
+    if (!fromRefresh || !manualAdv) {
+      $('adv1').value = c.adv1; $('adv2').value = c.adv2;
+      $('prev1').value = c.prev1; $('prev2').value = c.prev2;
+      manualAdv = false;
+      $('cInfo').textContent = 'પેશગી અને અગાઉની બચત શીટ મુજબ ભરાઈ';
+    } else {
+      $('cInfo').textContent = 'તમે બદલેલી રકમ રાખી છે';
+    }
+    update();
+  }
+
+  function showCenters(fromRefresh) {
+    $('centerBox').hidden = false;
+    fillCenterList();
+    var saved = '';
+    try { saved = localStorage.getItem(CSEL) || ''; } catch (e) {}
+    var want = curCenter ? curCenter.id : saved;
+    if (want) selectCenter(want, !!fromRefresh);
+  }
+
+  function fetchCenters(force) {
+    var now = Date.now();
+    if (!force && now - lastCFetch < 60000) return;
+    lastCFetch = now;
+    var url = CENTER_CSV_URL + (CENTER_CSV_URL.indexOf('?') > -1 ? '&' : '?') + 't=' + now;
+    fetch(url, { credentials: 'omit' }).then(function (r) {
+      if (!r.ok) throw new Error('http');
+      return r.text();
+    }).then(function (txt) {
+      var list = parseCenters(txt);
+      if (!list) throw new Error('format');
+      $('cMsg').textContent = '';
+      centers = list;
+      try { localStorage.setItem(CKEY, JSON.stringify({ list: list, at: stamp(new Date()) })); } catch (e) {}
+      showCenters(true);
+    }).catch(function (e) {
+      $('centerBox').hidden = false;
+      var bad = e && e.message === 'format', http = e && e.message === 'http';
+      $('cMsg').textContent = centers.length ? 'ઇન્ટરનેટ નથી, છેલ્લે મેળવેલી યાદી વપરાય છે.' :
+        bad ? 'શીટ મળી પણ કોલમ ક્રમ ખોટો છે (કોડ | નામ | PFMS પેશગી | IFMS પેશગી | PFMS બચત | IFMS બચત) અથવા ટેબ પબ્લિશ CSV નથી.' :
+        http ? 'શીટની લિંક ખુલતી નથી (Publish to web ફરી કરો).' : 'કેન્દ્રોની શીટ મેળવી શકાઈ નથી (ઇન્ટરનેટ તપાસો).';
+      if (!bad) $('cMsg').textContent += ' [' + (e && e.message || 'error') + ' | ' + location.protocol + ']';
+    });
+  }
+
+  function initCenters() {
+    if (!CENTER_CSV_URL) return;
+    try {
+      var c = JSON.parse(localStorage.getItem(CKEY) || 'null');
+      if (c && c.list && c.list.length) { centers = c.list; showCenters(false); }
+    } catch (e) {}
+    $('cFile').addEventListener('change', function () {
+      var fl = this.files && this.files[0]; if (!fl) return;
+      var rd = new FileReader();
+      rd.onload = function () {
+        var txt = String(rd.result || '').replace(/^\uFEFF/, '');
+        var list = parseCenters(txt);
+        if (!list) { $('cMsg').textContent = 'ફાઈલનું ફોર્મેટ બરાબર નથી (કોડ | નામ | PFMS પેશગી | IFMS પેશગી | PFMS બચત | IFMS બચત).'; return; }
+        $('cMsg').textContent = ''; centers = list;
+        try { localStorage.setItem(CKEY, JSON.stringify({ list: list, at: stamp(new Date()) })); } catch (e) {}
+        showCenters(true);
+        $('cInfo').textContent = list.length + ' કેન્દ્રો ફાઈલમાંથી મળ્યા';
+      };
+      rd.readAsText(fl, 'utf-8');
+      this.value = '';
+    });
+    $('cFind').addEventListener('input', fillCenterList);
+    $('cSel').addEventListener('change', function () { selectCenter($('cSel').value, false); });
+    ['adv1', 'adv2', 'prev1', 'prev2'].forEach(function (id) {
+      $(id).addEventListener('input', function () { manualAdv = true; });
+    });
+    fetchCenters(true);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) fetchCenters(false); });
+  }
+
+  $('sSave').addEventListener('click', function () {
+    var m = $('sMsg');
+    if (!sharedOn || !admin || !sharedRef) return;
+    m.className = 'a-msg';
+    m.textContent = 'સેવ થઈ રહ્યું છે...';
+    sharedRef.set({ rates: JSON.parse(JSON.stringify(rates)), updatedAt: new Date().toISOString() }).then(function () {
+      dirty = false;
+      m.className = 'a-msg ok';
+      m.textContent = 'દરો સેવ થયા. બધાને નવા દર લાગુ પડશે.';
+    }, function () {
+      m.className = 'a-msg';
+      m.textContent = 'સેવ ન થયું. ઇન્ટરનેટ તપાસો અથવા તમારી પાસે ફેરફારનો અધિકાર નથી.';
+    });
+  });
+  $('sReset').addEventListener('click', function () {
+    if (!sharedOn || !admin) return;
+    rates = JSON.parse(JSON.stringify(DEFAULTS));
+    dirty = true;
+    buildRates();
+    update();
+    $('sMsg').className = 'a-msg ok';
+    $('sMsg').textContent = 'મૂળ દરો ગોઠવાયા. બધા માટે લાગુ કરવા "દરો સેવ કરો" દબાવો.';
+  });
+
+  buildRates();
+  update();
+  initShared();
+  initCenters();
+})();
+</script>
+
+</body>
+</html>
